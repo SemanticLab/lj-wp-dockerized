@@ -1,0 +1,69 @@
+/*
+Theme Name: Twenty Twelve Child theme
+Description: A custom child theme.
+Template: twentytwelve
+*/
+@import url('../twentytwelve/style.css');
+
+/* =Notes
+--------------------------------------------------------------
+This stylesheet uses rem values with a pixel fallback. The rem
+values (and line heights) are calculated using two variables:
+
+$rembase:     14;
+$line-height: 24;
+
+---------- Examples
+
+* Use a pixel value with a rem fallback for font-size, padding, margins, etc.
+	padding: 5px 0;
+	padding: 0.357142857rem 0; (5 / $rembase)
+
+* Set a font-size and then set a line-height based on the font-size
+	font-size: 16px
+	font-size: 1.142857143rem; (16 / $rembase)
+	line-height: 1.5; ($line-height / 16)
+
+---------- Vertical spacing
+
+Vertical spacing between most elements should use 24px or 48px
+to maintain vertical rhythm:
+
+.my-new-div {
+	margin: 24px 0;
+	margin: 1.714285714rem 0; ( 24 / $rembase )
+}
+*/
+
+/* Basics */
+
+/* Masthead stuff */
+
+/* Remove shadow from header image and align left */
+.entry-content img, .comment-content img, .widget img, img.header-image, .author-avatar img, img.wp-post-image {
+	border-radius: 0;
+	box-shadow: none;
+}
+
+/* Headshot images on Team page */
+p.bio {clear: both;}
+p.bio img.alignleft {
+	margin: 0 24px 42px 0; 
+	margin: 0 1.714285714rem 3rem 0;
+}
+p.bio img.alignright {
+	margin: 0 0 42px 24px;
+	margin: 0 0 3rem 1.714285714rem;
+}
+
+/*Remove the Category Archives header */
+header.archive-header {
+display: none;
+}
+
+/*Logos for Institutional Sponsors */
+
+.grant img.aligncenter, a.grant {
+	margin: 24px 0;
+	width: 20%;
+}

@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+    <head>
+<base href="" />
+
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Linked Jazz 52nd Street</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+		<link rel="icon" type="image/png" href="/favicon.png">
+      
+        <link rel="stylesheet" href="/52new/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/52new/css/zocial.css">
+        <link rel="stylesheet" href="/52new/css/main.css">        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script src="/52new/js/jquery.backstretch.min.js"></script>                
+        <script src="/52new/js/bootstrap.js"></script>
+        
+        <script type="text/javascript">
+		
+		  var _gaq = _gaq || [];
+		  _gaq.push(['_setAccount', 'UA-34282776-1']);
+		  _gaq.push(['_trackPageview']);
+		
+		  (function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		  })();
+		
+		</script>
+        
+        
+        <script type="text/javascript">
+		
+		var fs = {};
+		
+		
+		$(document).ready(function($) {
+			
+			
+			
+			
+			
+			fs.urlForward = '';
+			
+			fs.bind = function(){
+				
+				//$("a").unbind();
+				
+				
+				
+				//LOGIN FORM
+				
+				//register button
+				$("#inputRegisterSubmit").bind("click",function(event){		
+					$(this).button('loading');								
+					fs.registerUser();
+					event.preventDefault();
+					return false;													
+				});
+				$("#inputLoginSubmit").bind("click",function(event){		
+					$(this).button('loading');								
+					fs.loginUser();
+					event.preventDefault();
+					return false;													
+				});		
+				$("#inputForgotSubmit").bind("click",function(event){		
+					$(this).button('loading');								
+					fs.resetUser();
+					event.preventDefault();
+					return false;													
+				});								
+				
+				$("#linkAbout").bind("click",function(event){		
+				
+					if ($("#about").css("display")=='none'){
+						$("#about").fadeIn('slow');	
+					}else{
+						$("#about").fadeOut('slow');
+					}
+					
+
+					event.preventDefault();
+					return false;													
+				});						
+				
+				
+				
+				
+				$(".modalLoginShowRegister").bind("click",function(event){	
+					$("#modalLoginRegisterForm").css("display","block");
+					$("#modalLoginLoginForm").css("display","none");
+					$("#modalLoginRegisterFormAlert").css("display","none");	
+					$("#modalLoginForgotPassword").css("display","none");			
+					event.preventDefault();
+					return false;					
+				});
+				$(".modalLoginShowLogin").bind("click",function(event){	
+					$("#modalLoginLoginForm").css("display","block");
+					$("#modalLoginRegisterForm").css("display","none");	
+					$("#modalLoginRegisterFormAlert").css("display","none");	
+					$("#modalLoginForgotPassword").css("display","none");				
+					event.preventDefault();
+					return false;					
+				});				
+				$(".modalLoginShowPassword").bind("click",function(event){	
+					$("#modalLoginLoginForm").css("display","none");
+					$("#modalLoginRegisterForm").css("display","none");	
+					$("#modalLoginRegisterFormAlert").css("display","none");	
+					$("#modalLoginForgotPassword").css("display","block");				
+					event.preventDefault();
+					return false;					
+				});					 
+				
+				
+				
+				//when they click on an interview item make sure they are logged in before sending them
+				$(".linkInerviewItem").bind("click",function(event){
+					
+					if(!signedIn){
+						
+						fs.urlForward = $(this).attr("href");  
+						$("#modalLogin").modal('show');
+						
+						
+						//modify the URLs of the 3rd party login to pass the url we want to go to
+						
+						$("#linkGoogleLogin").attr("href","/52new/login/?loginGoogle=true&urlForward=" + fs.urlForward);
+						$("#linkTwitterLogin").attr("href","/52new/login/?loginTwitter=true&urlForward=" + fs.urlForward);
+						$("#linkFacebookLogin").attr("href","/52new/login/?loginFacebook=true&urlForward=" + fs.urlForward);												
+						
+						event.preventDefault();
+						return false;	
+												
+					}
+
+				});
+				
+				
+				
+				//install the tool tips
+				$('[rel="tooltip"]').tooltip();
+				
+				//transcript item popup
+				$('[rel="popover"]').popover();
+				
+
+				 			
+				
+			}
+			
+			
+			fs.loginUser = function(){
+			
+				var loginObj = {};
+				loginObj.user = $("#inputLoginUsername").val();				
+				loginObj.pass = $("#inputLoginPassword").val();	
+				$.post("/52new/login/?loginOrganic=true", loginObj, function(data){					
+					if (data.error){		
+						$("#modalLoginRegisterFormAlert").text("Uh-oh: " + data.reason);
+						$("#modalLoginRegisterFormAlert").css("display","block");
+						$("#inputLoginSubmit").button('reset');	
+						Recaptcha.reload();
+						return false;
+					}else{
+						$("#modalLoginRegisterFormAlert").css("display","none");						
+						
+					}
+					$("#inputLoginSubmit").button('reset');			
+					
+					if(fs.urlForward!=''){
+						self.location=fs.urlForward;
+						return true;	
+					}
+					$("#modalLogin").modal('hide');
+					window.location.replace(window.location.pathname);
+							
+				}).error(function(data) { 
+					alert("There was an error connecting to the server, is your internet connection down?");
+				});
+				
+			}
+			
+			fs.resetUser = function(){
+			
+				var loginObj = {};
+				loginObj.email = $("#inputForgot").val();		 
+				
+				$.post("/52new/login/?loginForgot=true", loginObj, function(data){					
+					if (data.error){		
+						$("#modalLoginRegisterFormAlert").text("Uh-oh: " + data.reason);
+						$("#modalLoginRegisterFormAlert").css("display","block");
+						$("#inputForgotSubmit").button('reset');
+					}else{
+						$("#modalLoginRegisterFormAlert").text("OKAY! An email has been sent to you");
+						$("#modalLoginRegisterFormAlert").css("display","block");						
+						
+					}
+					$("#inputForgotSubmit").button('reset');					
+				}).error(function(data) { 
+					alert("There was an error connecting to the server, is your internet connection down?");
+				});
+				
+			}			
+			
+			fs.registerUser = function(){
+			
+				
+			
+				var registerObj = {};
+
+				registerObj.email = $("#inputRegisterEmail").val();
+				registerObj.user = $("#inputRegisterUsername").val();				
+				registerObj.pass = $("#inputRegisterPassword").val();				
+				registerObj.recaptcha_challenge_field = $("#recaptcha_challenge_field").val();
+				registerObj.recaptcha_response_field = $("#recaptcha_response_field").val();								
+				 
+				$.post("/52new/login/?loginRegister=true", registerObj, function(data){
+						
+					if (data.error){		
+						$("#modalLoginRegisterFormAlert").text("Uh-oh: " + data.reason);
+						$("#modalLoginRegisterFormAlert").css("display","block");
+						Recaptcha.reload();
+					}else{
+						$("#modalLoginRegisterFormAlert").css("display","none");						
+						
+					}
+					
+					$("#inputRegisterSubmit").button('reset');
+					if(fs.urlForward!=''){
+						self.location=fs.urlForward;
+						return true;	
+					}else{
+						$("#modalLogin").modal('hide');
+						window.location.replace(window.location.pathname);								
+					}
+			
+					
+				}).error(function(data) { 
+					alert("There was an error connecting to the server, is your internet connection down?");
+				});
+						
+				
+					
+				
+				
+			}
+			
+			
+			
+			fs.bind();
+			$.backstretch("/52new/img/bgBlack4.jpg");
+			
+		});
+		
+		</script>
+        
+        
+        
+        
+        <script type="text/javascript">
+			var signedIn = false;		</script>
+        
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+        <div id="mainPageFeedback"><a href="https://docs.google.com/forms/d/1pW3dQv0eYcA1ZRVhEHLaYOpZZTePmQ-_re1abjW4Q-Q/viewform">We need your feedback, tell us what you think&nbsp;<img src="/52ndStreet/img/feeback.png"></a></div>
+        
+        <div class="container" id="containerHomePage"> 
+        
+			        	<div id="loginHolder">
+            
+            
+            	<style>
+		
+				</style>
+				
+           
+                <div class="dropdown  pull-left">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                       <i style="color:#08C" class="icon-info-sign"></i>&nbsp;About</a><b class="caret"></b>&nbsp;&nbsp;
+                    
+                    <ul class="dropdown-menu" style="right:0; left:auto; min-width:250px">
+                        
+                        
+                        
+                        <li><a href="#modalAbout52" role="button" class="link" data-toggle="modal" id="linkAbout52"><img src="/52new/img/52_street_sign.png" style="height:45px; width:auto" /> About 52nd Street Tool</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#modalAboutLJ" role="button" class="link" data-toggle="modal" id="linkUser"><img src="/52new/img/lj_logo_alone.png" style="height:45px; width:auto" /> About Linked Jazz Project</a></li>
+                        
+                    </ul>
+                </div>                
+            
+            	                    	&nbsp;|&nbsp;&nbsp;<i style="color:#08C" class="icon-user"></i>&nbsp;<a href="#modalLogin" role="button" class="link" data-toggle="modal" id="linkLogin">Login</a>
+                                	
+            	
+            </div>
+            
+            
+    
+    <div class="modal hide" id="modalAbout52" tabindex="-1" role="dialog" aria-labelledby="myModalLabelAbout52" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabelAbout52">About 52nd Street Tool</h3>
+      </div>
+      <div class="modal-body">
+    		<div class="thumbnail" style="text-align:center;"><img src="/52new/img/Great_Day_in_Harlem.jpg"><a href="http://www.artkane.com/">Art Kane</a> — A Great Day In Harlem, 1958</div>
+
+Linked Jazz 52nd Street is a crowdsourcing tool that functions as an essential part of the overall Linked Jazz project. Linked Jazz 52nd Street invites users to select the type of relationship shared by jazz musicians based on short excerpts of interview transcripts pulled from jazz history archives. The relationships that users choose contribute to the Linked Open Data semantics on these jazz musicians.
+<br /><br />
+How exactly does that work? User contributions to Linked Jazz 52nd Street fill in the blanks for computers. Before a user chooses a relationship, the computer only knows that Musician A  and Musician B have some sort of relationship. Using the Linked Jazz 52nd Street interface, users can tell the computer that Musician A was the mentor of Musician B, that Musician C has met Musician D, and that Musician X toured with Musician Y. These relationships are then translated into Linked Open Data readable by computers, which can then be manipulated to visualize the jazz community network. Each choice that a user makes thus contributes to a richer and more sophisticated understanding of the complex relationships within the jazz community.            
+            
+            <br /><br />
+            This is a prototype tool under active development, if you have any comments or ideas we would <a href="mailto:linkedjazz@">love to hear them!</a>
+    
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button> 
+      </div>
+    </div>
+    
+    <div class="modal hide" id="modalAboutLJ" tabindex="-1" role="dialog" aria-labelledby="myModalLabelAboutLJ" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabelAboutLJ">About Linked Jazz Project</h3>
+      </div>
+      <div class="modal-body">
+    	
+        <div class="pull-left" style="width:27%">
+        	<img src="/52new/img/lj_logo_alone.png" style="height:140px; width:auto" />
+    	</div>
+        <div class="pull-left"  style="width:70%">
+        <p>
+Linked Jazz is an ongoing project that applies Linked Open Data (LOD) technology to enhance the discovery and visibility of digital cultural heritage materials. Utilizing documents from digital archives of jazz history, Linked Jazz works to expose the social relationships between jazz musicians and reveal their community’s network. This project aims to help uncover meaningful connections between documents and data related to the lives of musicians who often practice in rich and diverse social networks. Read more about Linked Jazz on the <a href="">Linked Jazz project website</a>. 
+<br /><br />
+Among the many tools and methods team members have developed, Linked Jazz 52nd Street plays an key role in the overall Linked Jazz project. This crowdsourcing tool provides an interface where users decide what type of relationship two jazz musicians share based on excerpts from interview transcripts. Read more about Linked Jazz 52nd Street.
+        
+        
+         </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button> 
+      </div>
+    </div>    
+    
+            
+            
+                
+    <script type="text/javascript">
+	
+	/*
+	 * Project: Twitter Bootstrap Hover Dropdown
+	 * Author: Cameron Spear
+	 * Contributors: Mattia Larentis
+	 *
+	 * Dependencies?: Twitter Bootstrap's Dropdown plugin
+	 *
+	 * A simple plugin to enable twitter bootstrap dropdowns to active on hover and provide a nice user experience.
+	 *
+	 * No license, do what you want. I'd love credit or a shoutout, though.
+	 *
+	 * http://cameronspear.com/blog/twitter-bootstrap-dropdown-on-hover-plugin/
+	 */(function(e,t,n){var r=e();e.fn.dropdownHover=function(n){r=r.add(this.parent());return this.each(function(){var n=e(this).parent(),i={delay:500,instantlyCloseOthers:!0},s={delay:e(this).data("delay"),instantlyCloseOthers:e(this).data("close-others")},o=e.extend(!0,{},i,o,s),u;n.hover(function(){o.instantlyCloseOthers===!0&&r.removeClass("open");t.clearTimeout(u);e(this).addClass("open")},function(){u=t.setTimeout(function(){n.removeClass("open")},o.delay)})})};e(document).ready(function(){e('[data-hover="dropdown"]').dropdownHover()})})(jQuery,this);
+		
+	
+	</script>        
+        	<div class="hero-unit" id="homePageHero">
+            	
+                
+                
+            	<div class="row">
+                	<div class="span5">
+		            	<img src="/52new/img/lj_52_logo.png"/>
+                    </div>
+                	<div id="logoPhrase"> 
+                        Revealing the relationships<br>of the jazz community
+                    </div>                    
+                </div>
+
+              
+            </div>
+            
+         
+            
+             
+            <div class="hero-unit" id="getStartedHero">
+            
+            	<h3 style="margin-bottom:10px;">Let's get started!</h3>
+            	<div style="text-align:center"><img src="/52new/img/1_2_3_4_VS4.png" style="width:700px; height:auto;"></div>
+            
+            <br>
+                
+                <div id="statsHero">
+                               
+                               
+                               
+                    
+                    <div id="projectStatusHolder">
+                        <div class="progress progress-info progress-striped">
+                          <div class="bar" style="width: 47%">
+                            <div id="statsHeroComplete">47% of Relationships Defined</div>
+                          </div>
+                        </div>                    
+                	</div>
+                </div>
+                
+                
+                
+                <div id="homePageTopMusicians">
+                 
+                    <ul class="thumbnails"> 
+                    							
+                              <li class="span2">
+                                <a href="/52new/work/Buddy_DeFranco" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Buddy DeFranco (0% done)" data-content="Interview transcript from Smithsonian interviewed by Molly Murphy.">
+                                      <div class="thumbnailTitle">Buddy DeFranco</div>
+                                      <img src="/image/square/Buddy_DeFranco.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 2%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Sam_Rivers" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Sam Rivers (0% done)" data-content="Interview transcript from University of Michigan interviewed by Darryl Duncan.">
+                                      <div class="thumbnailTitle">Sam Rivers</div>
+                                      <img src="/image/square/Sam_Rivers.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 2%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Louie_Bellson" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Louie Bellson (6% done)" data-content="Interview transcript from Smithsonian interviewed by Anthony Brown,  Ken Kimery, Anthony Brown.">
+                                      <div class="thumbnailTitle">Louie Bellson</div>
+                                      <img src="/image/square/Louie_Bellson.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 6%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/John_Levy_(musician)" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="John Levy (8% done)" data-content="Interview transcript from Smithsonian interviewed by .">
+                                      <div class="thumbnailTitle">John Levy</div>
+                                      <img src="/image/square/John_Levy_(musician).png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 8%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Danny_Barker" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Danny Barker (9% done)" data-content="Interview transcript from Smithsonian interviewed by .">
+                                      <div class="thumbnailTitle">Danny Barker</div>
+                                      <img src="/image/square/Danny_Barker.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 9%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Annie_Ross" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Annie Ross (11% done)" data-content="Interview transcript from Smithsonian interviewed by .">
+                                      <div class="thumbnailTitle">Annie Ross</div>
+                                      <img src="/image/square/Annie_Ross.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 11%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Stanley_Kay" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Stanley Kay (14% done)" data-content="Interview transcript from Hamilton College interviewed by .">
+                                      <div class="thumbnailTitle">Stanley Kay</div>
+                                      <img src="/image/square/Stanley_Kay.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 14%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Phil_Woods" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Phil Woods (15% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Phil Woods</div>
+                                      <img src="/image/square/Phil_Woods.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 15%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Toshiko_Akiyoshi" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Toshiko Akiyoshi (16% done)" data-content="Interview transcript from Smithsonian interviewed by Anthony Brown.">
+                                      <div class="thumbnailTitle">Toshiko Akiyoshi</div>
+                                      <img src="/image/square/Toshiko_Akiyoshi.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 16%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Jimmy_Lewis_(musician)" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Jimmy Lewis (18% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Jimmy Lewis</div>
+                                      <img src="/image/square/Jimmy_Lewis_(musician).png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 18%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Milt_Hinton" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Milt Hinton (22% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe, Joe Williams, Norman Simmons, Mike Woods.">
+                                      <div class="thumbnailTitle">Milt Hinton</div>
+                                      <img src="/image/square/Milt_Hinton.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 22%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Bill_Berry_(trumpeter)" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Bill Berry (22% done)" data-content="Interview transcript from Hamilton College interviewed by . Buster Cooper also participated in the interview.">
+                                      <div class="thumbnailTitle">Bill Berry</div>
+                                      <img src="/image/square/Bill_Berry_(trumpeter).png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 22%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Delfeayo_Marsalis" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Delfeayo Marsalis (22% done)" data-content="Interview transcript from Smithsonian interviewed by Anthony Brown,  Ken Kimery.">
+                                      <div class="thumbnailTitle">Delfeayo Marsalis</div>
+                                      <img src="/image/square/Delfeayo_Marsalis.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 22%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Vi_Redd" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Vi Redd (24% done)" data-content="Interview transcript from Hamilton College interviewed by .">
+                                      <div class="thumbnailTitle">Vi Redd</div>
+                                      <img src="/image/square/Vi_Redd.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 24%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Charles_McPherson_(musician)" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Charles McPherson (24% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Charles McPherson</div>
+                                      <img src="/image/square/Charles_McPherson_(musician).png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 24%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Bob_Haggart" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Bob Haggart (25% done)" data-content="Interview transcript from Hamilton College interviewed by Michael Woods.">
+                                      <div class="thumbnailTitle">Bob Haggart</div>
+                                      <img src="/image/square/Bob_Haggart.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 25%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Roy_Haynes" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Roy Haynes (25% done)" data-content="Interview transcript from Smithsonian interviewed by Anthony Brown,  Ken Kimery.">
+                                      <div class="thumbnailTitle">Roy Haynes</div>
+                                      <img src="/image/square/Roy_Haynes.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 25%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Joe_Williams_(jazz_singer)" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Joe Williams (28% done)" data-content="Interview transcript from Hamilton College interviewed by Leslie Gourse,  Monk Rowe.">
+                                      <div class="thumbnailTitle">Joe Williams</div>
+                                      <img src="/image/square/Joe_Williams_(jazz_singer).png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 28%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Buster_Williams" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Buster Williams (29% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Buster Williams</div>
+                                      <img src="/image/square/Buster_Williams.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 29%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Abbey_Lincoln" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Abbey Lincoln (30% done)" data-content="Interview transcript from Smithsonian interviewed by Sally Plaxson.">
+                                      <div class="thumbnailTitle">Abbey Lincoln</div>
+                                      <img src="/image/square/Abbey_Lincoln.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 30%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Billy_Taylor" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Billy Taylor (30% done)" data-content="Interview transcript from Hamilton College interviewed by .">
+                                      <div class="thumbnailTitle">Billy Taylor</div>
+                                      <img src="/image/square/Billy_Taylor.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 30%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Benny_Waters" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Benny Waters (31% done)" data-content="Interview transcript from Hamilton College interviewed by Michael Woods.">
+                                      <div class="thumbnailTitle">Benny Waters</div>
+                                      <img src="/image/square/Benny_Waters.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 31%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Clark_Terry" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Clark Terry (31% done)" data-content="Interview transcript from Hamilton College interviewed by Joe Williams, Michael Woods.">
+                                      <div class="thumbnailTitle">Clark Terry</div>
+                                      <img src="/image/square/Clark_Terry.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 31%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Mary_Lou_Williams" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Mary Lou Williams (36% done)" data-content="Interview transcript from Rutgers interviewed by John Wilson, John Wilson.">
+                                      <div class="thumbnailTitle">Mary Lou Williams</div>
+                                      <img src="/image/square/Mary_Lou_Williams.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 36%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Nancy_Wilson_(jazz_singer)" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Nancy Wilson (36% done)" data-content="Interview transcript from Smithsonian interviewed by .">
+                                      <div class="thumbnailTitle">Nancy Wilson</div>
+                                      <img src="/image/square/Nancy_Wilson_(jazz_singer).png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 36%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Buddy_Tate_(musician)" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Buddy Tate (42% done)" data-content="Interview transcript from Hamilton College interviewed by Michael Woods.">
+                                      <div class="thumbnailTitle">Buddy Tate</div>
+                                      <img src="/image/square/Buddy_Tate_(musician).png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 42%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Marian_McPartland" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Marian McPartland (53% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Marian McPartland</div>
+                                      <img src="/image/square/Marian_McPartland.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 53%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Melba_Liston" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Melba Liston (56% done)" data-content="Interview transcript from UCLA Center for Oral History Research, Library Special Collections, Charles E  Young Research Library, UCLA interviewed by Isoardi.">
+                                      <div class="thumbnailTitle">Melba Liston</div>
+                                      <img src="/image/square/Melba_Liston.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 56%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Leslie_Johnson_(publisher)" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Leslie Johnson (58% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Leslie Johnson</div>
+                                      <img src="/image/square/Leslie_Johnson_(publisher).png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 58%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Jimmy_Owens_(musician)" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Jimmy Owens (58% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Jimmy Owens</div>
+                                      <img src="/image/square/Jimmy_Owens_(musician).png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 58%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Red_Holloway" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Red Holloway (63% done)" data-content="Interview transcript from Hamilton College interviewed by Michael Woods, Monk Rowe.">
+                                      <div class="thumbnailTitle">Red Holloway</div>
+                                      <img src="/image/square/Red_Holloway.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 63%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Harold_Ousley" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Harold Ousley (67% done)" data-content="Interview transcript from Hamilton College interviewed by .">
+                                      <div class="thumbnailTitle">Harold Ousley</div>
+                                      <img src="/image/square/Harold_Ousley.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 67%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/David_Murray_(saxophonist)" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="David Murray (69% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">David Murray</div>
+                                      <img src="/image/square/David_Murray_(saxophonist).png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 69%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Dave_Brubeck" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Dave Brubeck (69% done)" data-content="Interview transcript from Smithsonian interviewed by Ted Gioia, Ken Kimery. Russell Gloyd, Iola Brubeck also participated in the interview.">
+                                      <div class="thumbnailTitle">Dave Brubeck</div>
+                                      <img src="/image/square/Dave_Brubeck.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 69%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Gerald_Wiggins" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Gerald Wiggins (72% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Gerald Wiggins</div>
+                                      <img src="/image/square/Gerald_Wiggins.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 72%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Doc_Cheatham" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Doc Cheatham (74% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe, Michael Woods.">
+                                      <div class="thumbnailTitle">Doc Cheatham</div>
+                                      <img src="/image/square/Doc_Cheatham.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 74%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Benny_Powell" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Benny Powell (74% done)" data-content="Interview transcript from Hamilton College interviewed by Michael Woods.">
+                                      <div class="thumbnailTitle">Benny Powell</div>
+                                      <img src="/image/square/Benny_Powell.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 74%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Mona_Hinton" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Mona Hinton (91% done)" data-content="Interview transcript from Hamilton College interviewed by Milt Fillius,  Mike Woods.">
+                                      <div class="thumbnailTitle">Mona Hinton</div>
+                                      <img src="/image/square/Mona_Hinton.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 91%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Billy_Eckstine" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Billy Eckstine (103% done)" data-content="Interview transcript from University of Michigan interviewed by Jim Standifer.">
+                                      <div class="thumbnailTitle">Billy Eckstine</div>
+                                      <img src="/image/square/Billy_Eckstine.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 103%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Ed_Shaughnessy" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Ed Shaughnessy (104% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Ed Shaughnessy</div>
+                                      <img src="/image/square/Ed_Shaughnessy.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 104%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Roy_Eldridge" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Roy Eldridge (106% done)" data-content="Interview transcript from University of Michigan interviewed by Jim Standifer.">
+                                      <div class="thumbnailTitle">Roy Eldridge</div>
+                                      <img src="/image/square/Roy_Eldridge.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 106%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Roswell_Rudd" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Roswell Rudd (107% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Roswell Rudd</div>
+                                      <img src="/image/square/Roswell_Rudd.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 107%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Slide_Hampton" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Slide Hampton (111% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Slide Hampton</div>
+                                      <img src="/image/square/Slide_Hampton.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 111%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Charles_Davis_(saxophonist)" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Charles Davis (129% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Charles Davis</div>
+                                      <img src="/image/square/Charles_Davis_(saxophonist).png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 129%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Jimmy_Scott" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Jimmy Scott (134% done)" data-content="Interview transcript from Smithsonian interviewed by Ken Kimery, David Ritz.">
+                                      <div class="thumbnailTitle">Jimmy Scott</div>
+                                      <img src="/image/square/Jimmy_Scott.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 134%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Oscar_Peterson" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Oscar Peterson (155% done)" data-content="Interview transcript from Hamilton College interviewed by Joe Williams.">
+                                      <div class="thumbnailTitle">Oscar Peterson</div>
+                                      <img src="/image/square/Oscar_Peterson.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 155%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Lionel_Hampton" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Lionel Hampton (159% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Lionel Hampton</div>
+                                      <img src="/image/square/Lionel_Hampton.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 159%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Jane_Jarvis" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Jane Jarvis (188% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Jane Jarvis</div>
+                                      <img src="/image/square/Jane_Jarvis.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 188%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/McCoy_Tyner" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="McCoy Tyner (225% done)" data-content="Interview transcript from University of Michigan interviewed by Jim Standifer.">
+                                      <div class="thumbnailTitle">McCoy Tyner</div>
+                                      <img src="/image/square/McCoy_Tyner.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 225%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Ron_Carter" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Ron Carter (252% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Ron Carter</div>
+                                      <img src="/image/square/Ron_Carter.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 252%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Buddy_DeFranco" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Buddy DeFranco (528% done)" data-content="Interview transcript from Hamilton College interviewed by Monk Rowe.">
+                                      <div class="thumbnailTitle">Buddy DeFranco</div>
+                                      <img src="/image/square/Buddy_DeFranco.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 528%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Count_Basie" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Count Basie (630% done)" data-content="Interview transcript from University of Michigan interviewed by Jim Standifer, Jim Standifer. Miss McCray, Freddie Green also participated in the interview.">
+                                      <div class="thumbnailTitle">Count Basie</div>
+                                      <img src="/image/square/Count_Basie.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 630%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Herbie_Hancock" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Herbie Hancock (633% done)" data-content="Interview transcript from Hamilton College interviewed by Michael Woods, Michael Woods.">
+                                      <div class="thumbnailTitle">Herbie Hancock</div>
+                                      <img src="/image/square/Herbie_Hancock.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 633%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+														
+                              <li class="span2">
+                                <a href="/52new/work/Sam_Rivers" class="linkInerviewItem">
+                                    <div class="thumbnail" data-trigger="hover" data-placement="top" rel="popover" data-title="Sam Rivers (979% done)" data-content="Interview transcript from University of Michigan interviewed by Darryl Duncan.">
+                                      <div class="thumbnailTitle">Sam Rivers</div>
+                                      <img src="/image/square/Sam_Rivers.png" alt="">
+                                        <div class="thumbnailProgress">
+                                            <div class="progress progress-info progress-striped">
+                                              <div class="bar" style="width: 979%"></div>
+                                            </div>                          
+                                        </div>
+                                    </div>
+                                </a>
+                              </li> 								
+							
+								
+							 
+                    </ul>
+                     
+                    
+
+                    
+                                                                                 
+                    
+                
+                </div>
+            
+            	<div style="text-align:center">This is a prototype tool under active development, if you have any comments or ideas we would <a href="mailto:linkedjazz@">love to hear them!</a></div>
+            	<br style="clear:both;">
+
+            </div>
+              
+        </div>
+        
+
+
+        
+    
+
+    
+ 
+		<script type="text/javascript">
+			
+					
+		</script>
+    
+    <div class="modal hide" id="modalLogin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h5 id="myModalLabel">To keep everything organized, please log in before we start</h5>
+  </div>
+  <div class="modal-body">
+  <span>Log in quickly by using an existing account. [<span style="font-size:12px; font-weight:bold;" rel="tooltip" data-placement="bottom" title="If you have an account with Google, Twiter or Facebook you can use it to log in to Linked Jazz. We only use it for authentication, we do not store or display your name, email address and do NOT have access to post on your wall, publish tweets, etc.">?</span>]</span><br /><br />
+  
+	<div class="pull-left">
+    	<a id="linkGoogleLogin" href="/52new/login/?loginGoogle=true"><button class='zocial google'>Log in with Google</button></a>    
+    </div>
+	<div class="pull-left">
+    	<a id="linkTwitterLogin" href="/52new/login/?loginTwitter=true"><button class='zocial twitter'>Log in with Twitter</button></a>
+    </div>
+	<div class="pull-left">
+    	<a id="linkFacebookLogin" href="/52new/login/?loginFacebook=true"><button class='zocial facebook'>Log in with Facebook</button></a>
+    </div>        
+	<br class="clearfix" />
+	<hr />
+ <span>Otherwise you can log in or create a Linked Jazz account.</span><br /><br />
+	<div class="alert alert-error" id="modalLoginRegisterFormAlert"></div>
+	<div id="modalLoginLoginForm">
+        <form class="form-inline">
+          <input type="text" id="inputLoginUsername" class="span3" placeholder="Email Address">
+          <input type="password" id="inputLoginPassword" class="span2" placeholder="Password">
+          <button type="submit"  rel="loadingButton" data-loading-text="Working..." autocomplete="off" id="inputLoginSubmit"  class="btn">Log in</button>
+        </form>    
+        <a href="#" class="modalLoginShowRegister">Register an account.</a>&nbsp;&nbsp;&nbsp;<a href="#" class="modalLoginShowPassword">Forgot Password.</a>
+    </div>
+
+	<div id="modalLoginRegisterForm">  
+        <form class="form-horizontal">
+          <div class="control-group">
+            <label class="control-label" for="inputEmail">Email</label>
+            <div class="controls">
+              <input type="text" id="inputRegisterEmail" placeholder="Email">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="inputUsername">User Name</label>
+            <div class="controls">
+              <input type="text" id="inputRegisterUsername" placeholder="User Name">
+            </div>
+          </div>          
+          <div class="control-group">
+            <label class="control-label" for="inputPassword">Password</label>
+            <div class="controls">
+              <input type="password" id="inputRegisterPassword" placeholder="Password">
+            </div>
+          </div>
+          <div class="control-group">
+          
+          	<script type="text/javascript" src="https://www.google.com/recaptcha/api/challenge?k=6LfUANYSAAAAAJnEmZnH520Ym9dMveqy92gUdx3G"></script>
+
+	<noscript>
+  		<iframe src="https://www.google.com/recaptcha/api/noscript?k=6LfUANYSAAAAAJnEmZnH520Ym9dMveqy92gUdx3G" height="300" width="500" frameborder="0"></iframe><br/>
+  		<textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>
+  		<input type="hidden" name="recaptcha_response_field" value="manual_challenge"/>
+	</noscript>           
+          </div>
+          
+          <div class="control-group">
+            <div class="controls">
+              <button type="submit" id="inputRegisterSubmit" rel="loadingButton" data-loading-text="Registering Account..." autocomplete="off" class="btn">Register</button>
+              <button  autocomplete="off" class="btn btn-link modalLoginShowLogin">I already have an account</button>
+            </div>
+          </div>
+        </form>    
+    
+    </div>
+    <div id="modalLoginForgotPassword">
+        <form class="form-inline">
+          <input type="text" id="inputForgot" class="span4" placeholder="Email Address">
+           <button type="submit"  rel="loadingButton" data-loading-text="Working..." autocomplete="off" id="inputForgotSubmit"  class="btn">Send Reset</button>
+        </form>    
+        <a href="#" class="modalLoginShowRegister">Register an account.</a>&nbsp;&nbsp;&nbsp;<a href="#" class="modalLoginShowLogin">Log in.</a>    
+    </div>
+
+
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button> 
+  </div>
+</div>        <div class="container">
+        
+        	
+            <div class="homePageHero" id="footer">
+            
+            
+            	<div class="footerMenu">
+                
+                    <ul class="breadcrumb" style="background-color:#fff">
+                    
+                      
+                      <li><a href="#modalAbout52" role="button"  data-toggle="modal">About 52nd Street</a> <span class="divider">/</span></li>
+                      <li><a href="mailto:linkedjazz@">Contact Us</a> <span class="divider">/</span></li>
+                      <li><a href="/">Linked Jazz Homepage</a></li>
+                    </ul>                
+                		
+                       <span style="font-size:12px;">
+                       <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/3.0/80x15.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Linked Jazz</span> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.  
+					 </span>
+                     <br>
+                     <span style="font-size:12px;">Background Image: <a href="http://memory.loc.gov/cgi-bin/query/r?ammem/gottlieb:@field(NUMBER+@band(gottlieb+02761))">William P. Gottlieb (photographer). (1948). [52nd Street, New York, N.Y., ca. July 1948]</a>.</span>
+                </div>
+            	
+                
+            
+            </div>
+        </div>
+        
+    </body>
+
+    
+</html>
